@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { autocomplete, fetchRoom, runCode } from '../api';
 import Editor from '@monaco-editor/react';
 
-const WS_BASE_URL = 'ws://localhost:8000/ws';
+const WS_BASE_URL = 'wss://pairprogrammer.onrender.com/ws';
 
 export default function RoomEditorPage() {
   const { roomId } = useParams();
@@ -14,15 +14,15 @@ export default function RoomEditorPage() {
   const [autoSuggestion, setAutoSuggestion] = useState('');
   const [loadingSuggestion, setLoadingSuggestion] = useState(false);
 
-  const [language, setLanguage] = useState('python'); // selected language for both autocomplete + run
+  const [language, setLanguage] = useState('python'); 
   const [runOutput, setRunOutput] = useState('');
   const [running, setRunning] = useState(false);
 
   const typingTimeoutRef = useRef(null);
   const ignoreIncomingRef = useRef(false);
-  const editorRef = useRef(null); // Monaco editor instance
+  const editorRef = useRef(null); 
 
-  // Map dropdown language -> Monaco language id
+ 
   const monacoLanguage =
     language === 'python'
       ? 'python'
