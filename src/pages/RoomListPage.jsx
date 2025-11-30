@@ -76,7 +76,7 @@ export default function RoomListPage() {
         </button>
       </form>
 
-      {loading && <p className="info-text">Loading rooms...</p>}
+      {loading && <p className="info-text">Loading rooms... This might take 50 to 60 seconds</p>}
       {error && <p className="error-text">{error}</p>}
 
       <div className="rooms-grid">
