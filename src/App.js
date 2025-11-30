@@ -8,7 +8,7 @@ export default function App() {
     <div className="app-root">
       <header className="app-header">
         <Link to="/" className="app-logo">
-          Python Pair Programming Studio
+          Pair Programming Studio
         </Link>
       </header>
 
