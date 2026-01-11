@@ -1,9 +1,10 @@
-﻿import React from 'react';
+﻿import React, { useMemo } from 'react';
+import './AnimatedBackground.css';
 
 export default function StaticStarfield() {
-    // Generate random stars with varying properties
-    const generateStars = () => {
-        const stars = [];
+    // Generate random stars with varying properties - memoized to prevent regeneration
+    const stars = useMemo(() => {
+        const starsArray = [];
         const numStars = 650;
 
         for (let i = 0; i < numStars; i++) {
@@ -12,8 +13,9 @@ export default function StaticStarfield() {
             const size = Math.random() * 3 + 1;
             const opacity = Math.random() * 0.7 + 0.3;
             const blur = Math.random() * 2;
+            const shouldSparkle = Math.random() < 0.05; // Only 5% of stars sparkle
 
-            stars.push({
+            starsArray.push({
                 left: `${x}%`,
                 top: `${y}%`,
                 width: `${size}px`,
@@ -23,30 +25,49 @@ export default function StaticStarfield() {
                 backgroundColor: 'white',
                 borderRadius: '50%',
                 position: 'absolute',
-                boxShadow: blur < 0.5 ? '0 0 2px rgba(255, 255, 255, 0.8)' : 'none'
+                boxShadow: blur < 0.5 ? '0 0 2px rgba(255, 255, 255, 0.8)' : 'none',
+                animation: shouldSparkle ? `sparkle ${3 + Math.random() * 4}s ease-in-out infinite` : 'none',
+                animationDelay: `${Math.random() * 10}s`
             });
         }
 
-        return stars;
-    };
+        return starsArray;
+    }, []); // Empty dependency array - only generate once
 
-    const stars = generateStars();
+    // Generate random shooting stars - memoized
+    const shootingStars = useMemo(() => {
+        const shootingStarsArray = [];
+        const numShootingStars = 3;
+
+        for (let i = 0; i < numShootingStars; i++) {
+            const startX = Math.random() * 100;
+            const startY = Math.random() * 60; // Keep in upper portion
+            const delay = Math.random() * 60 + 30; // 30-90 seconds delay
+
+            shootingStarsArray.push({
+                top: `${startY}%`,
+                left: `${startX}%`,
+                animationDelay: `${delay}s`
+            });
+        }
+
+        return shootingStarsArray;
+    }, []); // Empty dependency array - only generate once
 
     return (
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                zIndex: 0,
-                pointerEvents: 'none',
-                overflow: 'hidden'
-            }}
-        >
+        <div className="starfield-container">
+            {/* Static stars with occasional sparkle */}
             {stars.map((style, index) => (
                 <div key={index} style={style} />
+            ))}
+
+            {/* Shooting stars with random positions */}
+            {shootingStars.map((style, index) => (
+                <div
+                    key={`shooting-${index}`}
+                    className="shooting-star"
+                    style={style}
+                />
             ))}
         </div>
     );
