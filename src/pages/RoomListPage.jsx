@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchRooms, createRoom } from '../api'
+import { User, Lock, Check, X } from 'lucide-react'
+import { fetchRooms, createRoom as createRoomAPI, joinRoom as joinRoomAPI } from '../api'
+import { useAuth } from '../contexts/AuthContext'
+import CreateRoomModal from '../components/CreateRoomModal'
+import JoinPrivateRoomModal from '../components/JoinPrivateRoomModal'
 
 export default function RoomListPage() {
+  const { user } = useAuth()
   const [rooms, setRooms] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [joiningRoomId, setJoiningRoomId] = useState('')
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [selectedRoom, setSelectedRoom] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -27,25 +35,44 @@ export default function RoomListPage() {
     }
   }
 
-  async function handleCreateRoom() {
-    try {
-      setError('')
-      const room = await createRoom()
-      navigate(`/room/${room.roomId}`)
-    } catch (e) {
-      console.error(e)
-      setError('Failed to create room.')
+  async function handleCreateRoom(name, isPrivate, password, aiEnabled) {
+    const room = await createRoomAPI(name, isPrivate, password, aiEnabled)
+    await loadRooms()
+    navigate(`/room/${room.roomId}`)
+  }
+
+  async function handleJoinRoom(room) {
+    if (room.is_private) {
+      setSelectedRoom(room)
+      setShowPasswordModal(true)
+    } else {
+      try {
+        await joinRoomAPI(room.roomId)
+        navigate(`/room/${room.roomId}`)
+      } catch (e) {
+        console.error(e)
+        setError('Failed to join room.')
+      }
     }
   }
 
-  function handleJoin(roomId) {
-    navigate(`/room/${roomId}`)
+  async function handleJoinPrivateRoom(password) {
+    try {
+      await joinRoomAPI(selectedRoom.roomId, password)
+      setShowPasswordModal(false)
+      setSelectedRoom(null)
+      navigate(`/room/${selectedRoom.roomId}`)
+    } catch (e) {
+      console.error(e)
+      // Let the modal handle the error display
+      throw e
+    }
   }
 
   function handleJoinInputSubmit(e) {
     e.preventDefault()
     if (joiningRoomId.trim()) {
-      handleJoin(joiningRoomId.trim())
+      navigate(`/room/${joiningRoomId.trim()}`)
     }
   }
 
@@ -58,7 +85,7 @@ export default function RoomListPage() {
             Join an existing room or create a new space to pair-program in real time.
           </p>
         </div>
-        <button className="primary-btn" onClick={handleCreateRoom}>
+        <button className="primary-btn" onClick={() => setShowCreateModal(true)}>
           + Create New Room
         </button>
       </div>
@@ -82,33 +109,61 @@ export default function RoomListPage() {
       <div className="rooms-grid">
         {rooms.length === 0 && !loading && (
           <div className="empty-card">
-            <p>No rooms yet. Click “Create New Room” to start one.</p>
+            <p>No rooms yet. Click "Create New Room" to start one.</p>
           </div>
         )}
 
-        {rooms.map((room) => (
-          <div key={room.roomId} className="room-card">
-            <div className="room-card-header">
-              <h2>{room.roomId}</h2>
+        {rooms.map((room) => {
+          const isMyRoom = room.admin_id === user?.id
+          return (
+            <div key={room.roomId} className="room-card">
+              <div className="room-card-header">
+                <h2>{room.name}</h2>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  {isMyRoom && <span className="owner-badge">👤 Your Room</span>}
+                  {room.is_private && <span className="privacy-badge">🔒 Private</span>}
+                </div>
+              </div>
+              <p className="room-card-body">
+                Room ID: {room.roomId}
+                <br />
+                Admin: {room.admin_username}
+                <br />
+                AI Autocomplete: {room.ai_autocomplete_enabled ? '✓ Enabled' : '✗ Disabled'}
+              </p>
+              <div className="room-card-footer">
+                <button
+                  className="primary-btn"
+                  onClick={() => handleJoinRoom(room)}
+                >
+                  {isMyRoom ? 'Enter Room' : 'Join Room'}
+                </button>
+              </div>
             </div>
-            <p className="room-card-body">
-              Collaborative coding room. Click join to enter and start editing together.
-            </p>
-            <div className="room-card-footer">
-              <button
-                className="primary-btn"
-                onClick={() => handleJoin(room.roomId)}
-              >
-                Join Room
-              </button>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <button className="ghost-btn" onClick={loadRooms}>
         Refresh list
       </button>
+
+      <CreateRoomModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreate={handleCreateRoom}
+      />
+
+      <JoinPrivateRoomModal
+        isOpen={showPasswordModal}
+        onClose={() => {
+          setShowPasswordModal(false)
+          setSelectedRoom(null)
+        }}
+        onJoin={handleJoinPrivateRoom}
+        roomName={selectedRoom?.name}
+      />
     </div>
   )
 }
+
