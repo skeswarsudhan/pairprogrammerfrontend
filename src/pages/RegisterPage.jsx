@@ -42,7 +42,7 @@ export default function RegisterPage() {
 
     return (
         <div className="page-container auth-page">
-            {/* <AnimatedBackground /> */}
+            <AnimatedBackground />
             <div className="auth-card">
                 <h1 className="auth-title">Create Account</h1>
                 <p className="auth-subtitle">Join the pair programming community</p>

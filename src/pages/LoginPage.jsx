@@ -29,7 +29,7 @@ export default function LoginPage() {
 
     return (
         <div className="page-container auth-page">
-            {/* <AnimatedBackground /> */}
+            <AnimatedBackground />
             <div className="auth-card">
                 <h1 className="auth-title">Welcome Back</h1>
                 <p className="auth-subtitle">Sign in to continue pair programming</p>
