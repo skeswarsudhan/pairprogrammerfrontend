@@ -7,7 +7,7 @@ import RoomSettingsModal from '../components/RoomSettingsModal';
 import RoomUsersPanel from '../components/RoomUsersPanel';
 import JoinPrivateRoomModal from '../components/JoinPrivateRoomModal';
 
-const WS_BASE_URL = 'ws://localhost:8000/ws';
+const WS_BASE_URL = 'wss://pairprogrammer.onrender.com/ws';
 
 export default function RoomEditorPage() {
   const { roomId } = useParams();
