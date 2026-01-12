@@ -42,7 +42,10 @@ export default function RoomListPage() {
   }
 
   async function handleJoinRoom(room) {
-    if (room.is_private) {
+    const isMyRoom = user && room.admin_id === user.id;
+
+    // Admin can always join their own room without password
+    if (room.is_private && !isMyRoom) {
       setSelectedRoom(room)
       setShowPasswordModal(true)
     } else {
@@ -57,11 +60,12 @@ export default function RoomListPage() {
   }
 
   async function handleJoinPrivateRoom(password) {
+    const roomId = selectedRoom.roomId;
     try {
-      await joinRoomAPI(selectedRoom.roomId, password)
+      await joinRoomAPI(roomId, password)
       setShowPasswordModal(false)
       setSelectedRoom(null)
-      navigate(`/room/${selectedRoom.roomId}`)
+      navigate(`/room/${roomId}`)
     } catch (e) {
       console.error(e)
       // Let the modal handle the error display

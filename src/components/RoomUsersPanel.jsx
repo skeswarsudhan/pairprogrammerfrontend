@@ -8,15 +8,19 @@ export default function RoomUsersPanel({ roomId }) {
 
     useEffect(() => {
         loadUsers();
-        // Refresh users every 10 seconds
-        const interval = setInterval(loadUsers, 10000);
+        // Refresh users every 30 seconds (reduced frequency)
+        const interval = setInterval(loadUsers, 30000);
         return () => clearInterval(interval);
     }, [roomId]);
 
     async function loadUsers() {
         try {
             const data = await getRoomUsers(roomId);
-            setUsers(data);
+            // Only update if data actually changed to prevent unnecessary re-renders
+            setUsers(prevUsers => {
+                const hasChanged = JSON.stringify(prevUsers) !== JSON.stringify(data);
+                return hasChanged ? data : prevUsers;
+            });
             setError('');
         } catch (err) {
             console.error(err);

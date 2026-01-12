@@ -13,7 +13,7 @@ export default function JoinPrivateRoomModal({ isOpen, onClose, onJoin, roomName
         try {
             await onJoin(password);
             setPassword('');
-            onClose();
+            // Don't call onClose here - parent handles state change
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.detail || 'Incorrect password');

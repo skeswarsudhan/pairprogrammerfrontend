@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
     // Load token and user from localStorage on mount
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    
+
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
@@ -21,47 +21,47 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const response = await axios.post('https://pairprogrammer.onrender.com/auth/login', {
+    const response = await axios.post('http://localhost:8000/auth/login', {
       email,
       password
     });
-    
+
     const { access_token, user: userData } = response.data;
     setToken(access_token);
     setUser(userData);
     localStorage.setItem('token', access_token);
     localStorage.setItem('user', JSON.stringify(userData));
-    
+
     return userData;
   };
 
   const register = async (email, username, password) => {
-    const response = await axios.post('https://pairprogrammer.onrender.com/auth/register', {
+    const response = await axios.post('http://localhost:8000/auth/register', {
       email,
       username,
       password
     });
-    
+
     const { access_token, user: userData } = response.data;
     setToken(access_token);
     setUser(userData);
     localStorage.setItem('token', access_token);
     localStorage.setItem('user', JSON.stringify(userData));
-    
+
     return userData;
   };
 
   const googleAuth = async (googleToken) => {
-    const response = await axios.post('https://pairprogrammer.onrender.com/auth/google', {
+    const response = await axios.post('http://localhost:8000/auth/google', {
       token: googleToken
     });
-    
+
     const { access_token, user: userData } = response.data;
     setToken(access_token);
     setUser(userData);
     localStorage.setItem('token', access_token);
     localStorage.setItem('user', JSON.stringify(userData));
-    
+
     return userData;
   };
 

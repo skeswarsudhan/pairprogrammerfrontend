@@ -7,7 +7,7 @@ import RoomSettingsModal from '../components/RoomSettingsModal';
 import RoomUsersPanel from '../components/RoomUsersPanel';
 import JoinPrivateRoomModal from '../components/JoinPrivateRoomModal';
 
-const WS_BASE_URL = 'wss://pairprogrammer.onrender.com/ws';
+const WS_BASE_URL = 'ws://localhost:8000/ws';
 
 export default function RoomEditorPage() {
   const { roomId } = useParams();
@@ -55,7 +55,10 @@ export default function RoomEditorPage() {
         const roomData = await fetchRoom(roomId);
         setRoom(roomData);
 
-        // Automatically join the room
+        // Check if user is the admin
+        const isRoomAdmin = roomData.admin_id === user?.id;
+
+        // Try to join the room (admins and existing participants can join without password)
         try {
           await joinRoomAPI(roomId, null);
           // Successfully joined
@@ -63,14 +66,14 @@ export default function RoomEditorPage() {
             setCode(roomData.code);
           }
         } catch (joinErr) {
-          // Check if it's a private room requiring password
-          if (joinErr.response?.status === 400 && roomData.is_private) {
+          // Check if it's a private room requiring password (only for non-admins)
+          if (joinErr.response?.status === 400 && roomData.is_private && !isRoomAdmin) {
             setNeedsPassword(true);
           } else if (joinErr.response?.status === 401) {
             // Incorrect password or other auth issue
             setJoinError('Failed to join room. Please check your credentials.');
           } else {
-            // Already a participant, continue
+            // Already a participant or other success case, continue
             if (roomData && roomData.code) {
               setCode(roomData.code);
             }
@@ -87,9 +90,15 @@ export default function RoomEditorPage() {
       }
     }
     loadInitialData();
-  }, [roomId, navigate]);
+  }, [roomId, navigate, user]);
 
+  // Connect WebSocket only after room is loaded and user can access it
   useEffect(() => {
+    // Don't connect if room not loaded or needs password
+    if (!room || needsPassword) {
+      return;
+    }
+
     const socket = new WebSocket(`${WS_BASE_URL}/${roomId}?token=${token}`);
 
     socket.onopen = () => {
@@ -98,8 +107,32 @@ export default function RoomEditorPage() {
     };
 
     socket.onmessage = (event) => {
+      const data = event.data;
+
+      // Try to parse as JSON (for user_joined/user_left events)
+      try {
+        const message = JSON.parse(data);
+        // Handle user events - don't set as code
+        if (message.type === 'user_joined') {
+          console.log(`${message.username} joined the room`);
+          return; // Don't set as code
+        }
+        if (message.type === 'user_left') {
+          console.log(`${message.username} left the room`);
+          return; // Don't set as code
+        }
+        // If it's some other JSON, ignore it
+        if (message.type || message.error) {
+          console.log('Received WebSocket event:', message);
+          return;
+        }
+      } catch (e) {
+        // Not JSON, treat as plain text code
+      }
+
+      // Plain text code update
       ignoreIncomingRef.current = true;
-      setCode(event.data);
+      setCode(data);
       ignoreIncomingRef.current = false;
     };
 
@@ -115,7 +148,7 @@ export default function RoomEditorPage() {
     return () => {
       socket.close();
     };
-  }, [roomId, token]);
+  }, [roomId, token, room, needsPassword]);
 
   function handleEditorChange(value) {
     const newCode = value ?? '';
@@ -270,6 +303,28 @@ export default function RoomEditorPage() {
   }
 
   const isAdmin = room?.admin_id === user?.id;
+
+  // Show error page if room not found or join failed
+  if (joinError && !room) {
+    return (
+      <div className="room-page">
+        <div className="room-header">
+          <div>
+            <p className="back-link">
+              <Link to="/">← Back to rooms</Link>
+            </p>
+            <h1 className="room-title">Room Not Found</h1>
+          </div>
+        </div>
+        <div style={{ padding: '32px', textAlign: 'center' }}>
+          <div style={{ padding: '24px', background: 'rgba(220, 38, 38, 0.15)', border: '1px solid rgba(220, 38, 38, 0.6)', borderRadius: '12px', display: 'inline-block' }}>
+            <p className="error-text" style={{ fontSize: '18px', margin: 0 }}>{joinError}</p>
+            <p style={{ color: '#888', marginTop: '12px' }}>Redirecting to home page...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="room-page">
