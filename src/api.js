@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// const BASE_URL = 'http://localhost:8000';
-const BASE_URL = 'http://localhost:8000';
+// const BASE_URL = 'https://pairprogrammer.onrender.com';
+const BASE_URL = 'https://pairprogrammer.onrender.com';
 
 // Create axios instance
 const api = axios.create({

@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const response = await axios.post('http://localhost:8000/auth/login', {
+    const response = await axios.post('https://pairprogrammer.onrender.com/auth/login', {
       email,
       password
     });
@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (email, username, password) => {
-    const response = await axios.post('http://localhost:8000/auth/register', {
+    const response = await axios.post('https://pairprogrammer.onrender.com/auth/register', {
       email,
       username,
       password
@@ -52,7 +52,7 @@ export function AuthProvider({ children }) {
   };
 
   const googleAuth = async (googleToken) => {
-    const response = await axios.post('http://localhost:8000/auth/google', {
+    const response = await axios.post('https://pairprogrammer.onrender.com/auth/google', {
       token: googleToken
     });
 
