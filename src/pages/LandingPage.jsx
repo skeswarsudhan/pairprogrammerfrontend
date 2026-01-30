@@ -89,9 +89,7 @@ export default function LandingPage() {
             </section>
             */}
             
-            <footer className="landing-footer">
-                <p></p>
-            </footer> 
+            
         </div>
     );
 }

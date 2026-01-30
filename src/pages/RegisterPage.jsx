@@ -105,6 +105,7 @@ export default function RegisterPage() {
                     <button type="submit" className="primary-btn full-width" disabled={loading}>
                         {loading ? 'Creating account...' : 'Sign Up'}
                     </button>
+                    {loading ? 'Might take 50 to 60 seconds' : ''}
                 </form>
 
                 <div className="auth-footer">

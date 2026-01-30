@@ -66,6 +66,7 @@ export default function LoginPage() {
                     <button type="submit" className="primary-btn full-width" disabled={loading}>
                         {loading ? 'Signing in...' : 'Sign In'}
                     </button>
+                    {loading ? 'Might take 50 to 60 seconds' : ''}
                 </form>
 
                 <div className="auth-footer">
