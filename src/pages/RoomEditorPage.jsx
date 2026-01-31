@@ -26,7 +26,7 @@ export default function RoomEditorPage() {
   const [running, setRunning] = useState(false);
 
   const [showSettings, setShowSettings] = useState(false);
-  const [showUsers, setShowUsers] = useState(true);
+  const showUsers = true;
 
   const typingTimeoutRef = useRef(null);
   const ignoreIncomingRef = useRef(false);
@@ -47,7 +47,6 @@ export default function RoomEditorPage() {
 
   const [joinError, setJoinError] = useState('');
   const [needsPassword, setNeedsPassword] = useState(false);
-  const [roomPassword, setRoomPassword] = useState('');
 
   useEffect(() => {
     async function loadInitialData() {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { getRoomUsers } from '../api';
 
 export default function RoomUsersPanel({ roomId }) {
@@ -6,14 +6,7 @@ export default function RoomUsersPanel({ roomId }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        loadUsers();
-        // Refresh users every 30 seconds (reduced frequency)
-        const interval = setInterval(loadUsers, 30000);
-        return () => clearInterval(interval);
-    }, [roomId]);
-
-    async function loadUsers() {
+    const loadUsers = useCallback(async function () {
         try {
             const data = await getRoomUsers(roomId);
             // Only update if data actually changed to prevent unnecessary re-renders
@@ -28,7 +21,14 @@ export default function RoomUsersPanel({ roomId }) {
         } finally {
             setLoading(false);
         }
-    }
+    }, [roomId]);
+
+    useEffect(() => {
+        loadUsers();
+        // Refresh users every 30 seconds (reduced frequency)
+        const interval = setInterval(loadUsers, 30000);
+        return () => clearInterval(interval);
+    }, [loadUsers]);
 
     return (
         <div className="users-panel">

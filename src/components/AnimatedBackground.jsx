@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import './AnimatedBackground.css';
 
 export default function StaticStarfield() {

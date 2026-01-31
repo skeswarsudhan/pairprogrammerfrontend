@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { User, Lock, Check, X } from 'lucide-react'
 import { fetchRooms, createRoom as createRoomAPI, joinRoom as joinRoomAPI } from '../api'
 import { useAuth } from '../contexts/AuthContext'
 import CreateRoomModal from '../components/CreateRoomModal'
